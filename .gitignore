@@ -1,0 +1,39 @@
+# Large packaged artifacts belong in GitHub Releases.
+Astro-Note-AI.exe
+Astro-Note-AI.dmg
+Astro-Note-AI_*.zip
+AstroPhLLMWiki
+AstroPhLLMWiki.bak-before-window-title
+
+# Exclude bundled runtime dependencies, but keep the app source embedded in
+# the packaged tree.
+_internal/*
+!_internal/app/
+_internal/app/*
+!_internal/app/config/
+!_internal/app/config/**
+!_internal/app/scripts/
+!_internal/app/scripts/**
+!_internal/app/src/
+!_internal/app/src/**
+!_internal/app/ui/
+!_internal/app/ui/**
+!_internal/app/index.html
+
+# Generated user/research data.
+_internal/app/data/
+_internal/app/wiki/
+_internal/app/graphify-out/
+_internal/app/logs/
+_internal/app/reports/
+_internal/app/conversations/
+
+# Python/runtime caches.
+__pycache__/
+*.py[cod]
+
+# Local secrets and machine-specific settings.
+.env
+*.env
+local_settings.json
+*_settings.json

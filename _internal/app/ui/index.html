@@ -1,0 +1,449 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Astro-Note AI</title>
+  <link rel="stylesheet" href="/static/app.css?v=20260522-loading">
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [["$", "$"], ["\\(", "\\)"]],
+        displayMath: [["$$", "$$"], ["\\[", "\\]"]],
+        processEscapes: true
+      },
+      options: {
+        skipHtmlTags: ["script", "noscript", "style", "textarea", "pre", "code"]
+      },
+      startup: {
+        typeset: false,
+        ready: () => {
+          MathJax.startup.defaultReady();
+          window.dispatchEvent(new Event("mathjax-ready"));
+        }
+      }
+    };
+  </script>
+  <script defer src="/static/vendor/mathjax/tex-chtml-full.js"></script>
+</head>
+<body class="app-loading" aria-busy="true">
+  <div id="bootOverlay" class="boot-overlay" role="status" aria-live="polite">
+    <div class="boot-panel">
+      <svg class="boot-symbol" viewBox="0 0 820 430" aria-hidden="true">
+        <path class="arc" d="M92 330 Q410 36 728 330"/>
+        <path class="arc" d="M220 330 Q410 178 600 330"/>
+        <path class="net" d="M92 330 L210 120 L282 318 L410 80 L540 318 L684 240 L728 330"/>
+        <path class="net" d="M210 120 L360 145 L500 135 L684 240"/>
+        <path class="signature" d="M410 82 L410 230 M338 175 H463"/>
+        <path class="star" d="M410 24 C420 74 432 86 482 96 C432 106 420 118 410 168 C400 118 388 106 338 96 C388 86 400 74 410 24Z"/>
+        <circle class="hollow" cx="92" cy="330" r="16"/>
+        <circle class="hollow" cx="210" cy="120" r="15"/>
+        <circle class="hollow" cx="728" cy="330" r="17"/>
+        <circle class="node" cx="282" cy="318" r="18"/>
+        <circle class="node" cx="410" cy="230" r="17"/>
+        <circle class="node" cx="540" cy="318" r="17"/>
+      </svg>
+      <div id="bootMessage">Astro-Note AI is loading...</div>
+    </div>
+  </div>
+  <header class="topbar">
+    <div class="app-brand">
+      <a id="openAbout" class="logo-link" href="#about" aria-label="About Astro-Note AI">
+      <svg class="brand-symbol" viewBox="0 0 820 430" aria-hidden="true">
+        <path class="arc" d="M92 330 Q410 36 728 330"/>
+        <path class="arc" d="M220 330 Q410 178 600 330"/>
+        <path class="net" d="M92 330 L210 120 L282 318 L410 80 L540 318 L684 240 L728 330"/>
+        <path class="net" d="M210 120 L360 145 L500 135 L684 240"/>
+        <path class="signature" d="M410 82 L410 230 M338 175 H463"/>
+        <path class="star" d="M410 24 C420 74 432 86 482 96 C432 106 420 118 410 168 C400 118 388 106 338 96 C388 86 400 74 410 24Z"/>
+        <circle class="hollow" cx="92" cy="330" r="16"/>
+        <circle class="hollow" cx="210" cy="120" r="15"/>
+        <circle class="hollow" cx="728" cy="330" r="17"/>
+        <circle class="node" cx="282" cy="318" r="18"/>
+        <circle class="node" cx="410" cy="230" r="17"/>
+        <circle class="node" cx="540" cy="318" r="17"/>
+      </svg>
+      </a>
+      <a class="brand-copy" href="/astro-ph-llm-wiki" aria-label="Astro-Note AI home">
+        <h1>Astro-Note AI</h1>
+        <div id="subtitle" class="muted">Powered by LLM Wiki</div>
+      </a>
+    </div>
+    <nav class="tabs" aria-label="Primary">
+      <button class="tab active" data-view="dashboard">Dashboard</button>
+      <button class="tab" data-view="upload">Upload</button>
+      <button class="tab" data-view="papers">Papers</button>
+      <button class="tab" data-view="wiki">Wiki</button>
+      <button class="tab" data-view="chat">Chat</button>
+      <button class="tab" data-view="graph">Graph</button>
+    </nav>
+    <button id="openSettings" class="settings-trigger" type="button" title="Settings" aria-label="Settings">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="12" cy="12" r="3.2"/>
+        <path d="M12 2.9v2.2"/>
+        <path d="M12 18.9v2.2"/>
+        <path d="M2.9 12h2.2"/>
+        <path d="M18.9 12h2.2"/>
+        <path d="m5.6 5.6 1.55 1.55"/>
+        <path d="m16.85 16.85 1.55 1.55"/>
+        <path d="m18.4 5.6-1.55 1.55"/>
+        <path d="m7.15 16.85-1.55 1.55"/>
+        <path d="M14.7 4.1 14 6.2"/>
+        <path d="m10 17.8-.7 2.1"/>
+        <path d="m19.9 14.7-2.1-.7"/>
+        <path d="m6.2 10-2.1-.7"/>
+        <path d="m19.9 9.3-2.1.7"/>
+        <path d="m6.2 14-2.1.7"/>
+        <path d="m14.7 19.9-.7-2.1"/>
+        <path d="m10 6.2-.7-2.1"/>
+      </svg>
+    </button>
+  </header>
+
+  <main>
+    <section id="dashboard" class="view active">
+      <div class="metric-grid" id="metrics"></div>
+      <div class="split">
+        <section>
+          <div class="section-head">
+            <h2>Semantic Topics</h2>
+            <button id="refreshDashboard" class="icon-button" title="Refresh">Refresh</button>
+          </div>
+          <div id="semanticTopicList" class="list"></div>
+        </section>
+        <section>
+          <div class="section-head">
+            <h2>Recent Papers</h2>
+          </div>
+          <div id="recentPapers" class="list compact"></div>
+        </section>
+      </div>
+    </section>
+
+    <section id="upload" class="view">
+      <div class="upload-layout">
+        <form id="uploadForm" class="upload-form">
+          <div class="section-head">
+            <h2>Upload Paper / Document</h2>
+            <button type="submit">Upload & Process</button>
+          </div>
+          <div class="form-grid upload-form-grid">
+            <label class="field">
+              <span>PDFs / Markdown</span>
+              <input id="uploadPdf" name="paper" type="file" accept="application/pdf,text/markdown,text/plain,.pdf,.md,.markdown" multiple required>
+            </label>
+            <label class="field">
+              <span>Categories</span>
+              <input id="uploadCategories" name="categories" type="text" value="paper">
+            </label>
+          </div>
+        </form>
+        <form id="batchUploadForm" class="upload-section">
+          <div class="section-head">
+            <h2>Batch Process</h2>
+            <button type="submit">Run Batch</button>
+          </div>
+          <div class="form-grid batch-form-grid">
+            <label class="field">
+              <span>PDF folder</span>
+              <div class="folder-control">
+                <input id="batchFolder" type="text" autocomplete="off" required>
+                <button id="chooseBatchFolder" type="button">Browse</button>
+              </div>
+            </label>
+            <label class="field">
+              <span>Mode</span>
+              <select id="batchMode">
+                <option value="new" selected>New / changed only</option>
+                <option value="reprocess">Delete wiki & reprocess all</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Categories</span>
+              <input id="batchCategories" type="text" value="paper">
+            </label>
+          </div>
+        </form>
+        <section class="upload-section prompt-editor">
+          <div class="section-head">
+            <h2>Work Prompt</h2>
+            <div class="dialog-actions">
+              <button id="resetUploadPrompt" type="button">Reset</button>
+              <button id="saveUploadPrompt" type="button">Save</button>
+            </div>
+          </div>
+          <div class="prompt-editor-body">
+            <textarea id="uploadPromptEditor" spellcheck="false"></textarea>
+            <div id="uploadPromptStatus" class="item-meta">Loading prompt...</div>
+          </div>
+        </section>
+        <div id="uploadProgress" class="upload-progress" hidden>
+          <div class="upload-progress-head">
+            <div>
+              <div id="uploadProgressStage" class="context-label">Waiting</div>
+              <div id="uploadProgressMessage" class="upload-progress-message">No upload in progress.</div>
+            </div>
+            <div id="uploadProgressPercent" class="upload-progress-percent">0%</div>
+          </div>
+          <div class="upload-progress-bar" aria-hidden="true">
+            <div id="uploadProgressBar"></div>
+          </div>
+          <div id="uploadProgressFile" class="item-meta"></div>
+          <div id="uploadProgressLog" class="upload-progress-log"></div>
+        </div>
+        <section class="paper-discovery-panel">
+          <div class="section-head">
+            <h2>Discover Papers</h2>
+            <button id="clearRemotePaperSearch" class="icon-button" type="button" title="Clear discovery results">Clear</button>
+          </div>
+          <form id="remotePaperSearchForm" class="paper-search-controls">
+            <input id="remotePaperSearch" type="search" placeholder="Search astro-ph by research goal, method, object, or arXiv syntax" aria-label="Search arXiv papers">
+            <select id="remotePaperSearchLimit" aria-label="arXiv search limit">
+              <option value="25">25 candidates</option>
+              <option value="50" selected>50 candidates</option>
+              <option value="100">100 candidates</option>
+            </select>
+            <select id="remotePaperSearchProvider" aria-label="Paper search provider">
+              <option value="auto" selected>Auto</option>
+              <option value="ads">ADS</option>
+              <option value="arxiv">arXiv</option>
+              <option value="local">Local</option>
+            </select>
+            <label class="check" title="Use the configured LLM to convert the goal into astronomy search terms">
+              <input id="remotePaperUseLlm" type="checkbox" checked>
+              <span>LLM goal</span>
+            </label>
+            <button type="submit">Search</button>
+          </form>
+          <div id="remotePaperSearchStatus" class="paper-search-status">Search ADS/arXiv astro-ph. Similar papers appear as a graph; choose one to download and build a wiki page.</div>
+          <div id="remoteBuildProgress" class="upload-progress paper-build-progress" hidden>
+            <div class="upload-progress-head">
+              <div>
+                <div id="remoteBuildProgressStage" class="context-label">Waiting</div>
+                <div id="remoteBuildProgressMessage" class="upload-progress-message">No Build Wiki job in progress.</div>
+              </div>
+              <div id="remoteBuildProgressPercent" class="upload-progress-percent">0%</div>
+            </div>
+            <div class="upload-progress-bar" aria-hidden="true">
+              <div id="remoteBuildProgressBar"></div>
+            </div>
+            <div id="remoteBuildProgressFile" class="item-meta"></div>
+            <div id="remoteBuildProgressLog" class="upload-progress-log"></div>
+          </div>
+          <div class="paper-discovery-workspace">
+            <div id="remotePaperGraph" class="paper-similarity-graph">
+              <div class="item empty">No discovery graph yet.</div>
+            </div>
+            <aside id="remotePaperSearchResults" class="paper-search-results"></aside>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <section id="papers" class="view">
+      <div class="filters">
+        <input id="paperSearch" type="search" placeholder="Search title, paper ID, abstract" aria-label="Search papers">
+        <select id="statusFilter" aria-label="Status filter">
+          <option value="">All statuses</option>
+        </select>
+        <button id="reloadPapers">Reload</button>
+      </div>
+      <div class="paper-layout">
+        <div id="paperList" class="table-list"></div>
+        <article id="paperDetail" class="paper-detail empty">Select a paper.</article>
+      </div>
+    </section>
+
+    <section id="wiki" class="view">
+      <div class="wiki-layout">
+        <aside id="wikiList" class="side-list"></aside>
+        <article id="wikiReader" class="reader empty">Select a wiki page.</article>
+        <aside id="wikiSubReader" class="wiki-sub-reader" hidden></aside>
+      </div>
+    </section>
+
+    <section id="chat" class="view">
+      <div class="chat-layout">
+        <div id="chatContext" class="chat-context" hidden></div>
+        <div id="chatWorkspace" class="chat-workspace">
+          <section id="chatPaperPane" class="chat-paper-pane" hidden>
+            <div id="chatPdfSlot" class="chat-pdf-slot"></div>
+          </section>
+          <section class="chat-main-pane">
+            <article id="chatKoreanSummary" class="reader chat-summary-panel" hidden></article>
+            <div id="chatLog" class="chat-log"></div>
+          </section>
+        </div>
+        <form id="chatForm" class="chat-form">
+          <input id="chatQuestion" type="text" placeholder="Ask the wiki" autocomplete="off">
+          <select id="chatModel" aria-label="Chat model">
+            <option value="">Loading models...</option>
+          </select>
+          <button type="submit">Ask</button>
+        </form>
+      </div>
+    </section>
+
+    <section id="graph" class="view graph-view">
+      <iframe id="graphFrame" title="Astro Wiki Graph"></iframe>
+    </section>
+
+    <dialog id="settingsDialog" class="settings-dialog">
+      <form id="settingsForm" class="settings-panel">
+        <div class="section-head">
+          <h2>LLM Settings</h2>
+          <div class="dialog-actions">
+            <button type="submit">Save</button>
+            <button id="closeSettings" class="icon-button" type="button" title="Close" aria-label="Close">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M6 6l12 12M18 6 6 18"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="form-grid">
+          <label class="field">
+            <span>Provider</span>
+            <select id="settingsProvider">
+              <option value="ollama">Ollama</option>
+              <option value="openai">OpenAI API</option>
+              <option value="gemini">Google Gemini API</option>
+              <option value="anthropic">Anthropic Claude API</option>
+              <option value="openrouter">OpenRouter</option>
+              <option value="groq">Groq</option>
+              <option value="deepseek">DeepSeek</option>
+              <option value="xai">xAI</option>
+              <option value="mistral">Mistral AI</option>
+              <option value="openai_compatible">Custom OpenAI-compatible</option>
+            </select>
+          </label>
+          <label id="settingsContextField" class="field">
+            <span>Context window</span>
+            <input id="settingsContext" type="number" min="1024" step="1024">
+          </label>
+          <label id="settingsOpenaiBaseUrlField" class="field wide">
+            <span>API base URL</span>
+            <input id="settingsOpenaiBaseUrl" type="url" placeholder="http://localhost:8000/v1">
+          </label>
+          <label id="settingsOpenaiApiKeyField" class="field wide">
+            <span>API key</span>
+            <input id="settingsOpenaiApiKey" type="password" autocomplete="off">
+          </label>
+          <label id="settingsNasaAdsApiKeyField" class="field wide">
+            <span>NASA ADS API key</span>
+            <input id="settingsNasaAdsApiKey" type="password" autocomplete="off">
+          </label>
+          <label id="settingsOllamaBaseUrlField" class="field wide">
+            <span>Ollama base URL</span>
+            <input id="settingsOllamaBaseUrl" type="url" placeholder="http://localhost:11434">
+          </label>
+          <label id="settingsChatModelField" class="field">
+            <span>Chat model</span>
+            <input id="settingsChatModel" list="settingsChatModelList" autocomplete="off" placeholder="Model ID">
+            <datalist id="settingsChatModelList"></datalist>
+          </label>
+          <label id="settingsRetrievalModelField" class="field">
+            <span>Retrieval model</span>
+            <input id="settingsRetrievalModel" list="settingsRetrievalModelList" autocomplete="off" placeholder="Model ID">
+            <datalist id="settingsRetrievalModelList"></datalist>
+          </label>
+        </div>
+        <pre id="settingsOutput" class="output">Loading settings...</pre>
+      </form>
+    </dialog>
+
+    <dialog id="aboutDialog" class="about-dialog">
+      <section class="about-panel">
+        <div class="about-mark" aria-hidden="true">
+          <svg viewBox="0 0 820 430">
+            <path class="arc" d="M92 330 Q410 36 728 330"/>
+            <path class="arc" d="M220 330 Q410 178 600 330"/>
+            <path class="net" d="M92 330 L210 120 L282 318 L410 80 L540 318 L684 240 L728 330"/>
+            <path class="net" d="M210 120 L360 145 L500 135 L684 240"/>
+            <path class="signature" d="M410 82 L410 230 M338 175 H463"/>
+            <path class="star" d="M410 24 C420 74 432 86 482 96 C432 106 420 118 410 168 C400 118 388 106 338 96 C388 86 400 74 410 24Z"/>
+            <circle class="hollow" cx="92" cy="330" r="16"/>
+            <circle class="hollow" cx="210" cy="120" r="15"/>
+            <circle class="hollow" cx="728" cy="330" r="17"/>
+            <circle class="node" cx="282" cy="318" r="18"/>
+            <circle class="node" cx="410" cy="230" r="17"/>
+            <circle class="node" cx="540" cy="318" r="17"/>
+          </svg>
+        </div>
+        <div class="about-copy">
+          <div class="context-label">About</div>
+          <h2>Astro-Note AI</h2>
+          <dl>
+            <div>
+              <dt>Version</dt>
+              <dd>1.0</dd>
+            </div>
+            <div>
+              <dt>Copyright</dt>
+              <dd>star4citizen</dd>
+            </div>
+            <div>
+              <dt>Email</dt>
+              <dd><a href="mailto:star4citizen@gmail.com">star4citizen@gmail.com</a></dd>
+            </div>
+          </dl>
+        </div>
+        <button id="closeAbout" class="icon-button about-close" type="button" title="Close" aria-label="Close">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M6 6l12 12M18 6 6 18"/>
+          </svg>
+        </button>
+      </section>
+    </dialog>
+
+    <section id="review" class="view">
+      <div class="review-layout">
+        <section>
+          <div class="section-head">
+            <h2>Review Queue</h2>
+            <button id="refreshReview">Refresh</button>
+          </div>
+          <div id="proposalQueue" class="list"></div>
+        </section>
+        <section>
+          <div class="section-head">
+            <h2>Wiki Lint</h2>
+            <button id="runLintNow">Run Lint</button>
+          </div>
+          <article id="lintReport" class="reader empty">No lint report loaded.</article>
+        </section>
+      </div>
+    </section>
+
+    <section id="runs" class="view">
+      <div class="run-panel">
+        <div class="run-controls">
+          <select id="runCommand" aria-label="Agent command">
+            <option value="classify">Classify</option>
+            <option value="extract">Extract text</option>
+            <option value="ingest">Ingest papers</option>
+            <option value="digest">Daily digest</option>
+            <option value="newsletter">Daily newsletter</option>
+            <option value="curate">Curate wiki</option>
+            <option value="graph">Build graph</option>
+            <option value="semantic">Semantic wiki</option>
+            <option value="qmd">Update QMD index</option>
+            <option value="summaries">Korean summaries</option>
+            <option value="lint">Lint wiki</option>
+          </select>
+          <input id="runDate" type="date" aria-label="Run date">
+          <input id="runLimit" type="number" min="1" placeholder="Limit">
+          <input id="runSearchQuery" type="search" placeholder="Optional search query; blank uses default topics" aria-label="Run search query">
+          <label class="check"><input id="runNoLlm" type="checkbox" checked> No LLM</label>
+          <button id="startRun">Run</button>
+        </div>
+        <pre id="runOutput" class="output"></pre>
+      </div>
+    </section>
+  </main>
+
+  <aside id="citationTrace" class="citation-trace" aria-label="Citation trace" hidden></aside>
+
+  <script src="/static/app.js?v=20260522-loading"></script>
+</body>
+</html>

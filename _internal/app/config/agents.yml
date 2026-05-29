@@ -1,0 +1,225 @@
+agents:
+  scheduler:
+    enabled: true
+    timezone: "Asia/Seoul"
+    run_at: "01:00"
+
+  arxiv_scout:
+    max_results: 200
+    request_delay_seconds: 3
+    categories:
+      - astro-ph.GA
+      - astro-ph.CO
+      - astro-ph.IM
+      - astro-ph.EP
+      - astro-ph.HE
+      - astro-ph.SR
+
+  classifier:
+    model: ""
+    min_relevance_score: 3
+    require_json: true
+
+  acquisition:
+    download_pdfs: true
+    overwrite_existing: false
+    request_timeout_seconds: 45
+
+  text_extraction:
+    min_text_chars: 5000
+
+  paper_ingest:
+    model: ""
+    source: "auto"
+    max_chunk_chars: 9000
+    max_chunks: null
+    parallel_map: 4
+    reduce_input_max_chars: 120000
+    reduce_num_predict: 4096
+    reduce_timeout_seconds: 600
+    reduce_retries: 1
+    numeric_validation: true
+    auto_create_paper_pages: true
+
+  daily_digest:
+    model: ""
+    output_dir: "wiki/daily"
+    interest_profile_path: "wiki/interests/profile.md"
+    brief_all_selected_papers: true
+    deep_summary_threshold: 4
+    max_deep_summaries_per_day: 5
+    require_human_approval_for_inferred_long_term_interests: true
+
+  daily_newsletter:
+    enabled: true
+    model: ""
+    output_dir: "wiki/newsletters"
+    max_papers: 10
+    timeout_seconds: 600
+    max_tokens: 3200
+    temperature: 0.25
+
+  paperforge_deep_summary:
+    enabled: true
+    root: ""
+    python: ""
+    output_dir: "data/paperforge"
+    timeout_seconds: 3600
+    text_backend: ""
+    remote_gemma4_timeout: 1800
+    remote_gemma4_max_tokens: 16384
+    num_ctx: 128000
+    num_predict: 4096
+    chunk_chars: 12000
+    reduce_chars: 45000
+    rounds: 1
+    download_references: true
+    download_reference_limit: 10
+    use_reference_rag: true
+    reference_rag_top_k: 4
+    reference_chunk_chars: 3000
+    unload_models_after_run: false
+
+  wiki_curator:
+    model: ""
+    conservative_mode: true
+    require_human_approval_for_synthesis: true
+
+  graph_builder:
+    enabled: true
+    input_path: "wiki/papers"
+    output_path: "graphify-out"
+
+  semantic_wiki:
+    enabled: true
+    input_graph: "graphify-out/graph.json"
+    output_dir: "wiki/topics/semantic"
+    model: ""
+    min_papers: 2
+    max_topics: 80
+    max_papers_per_topic: 25
+    synthesize_articles: true
+    synthesis_max_topics_per_run: 80
+    synthesis_timeout_seconds: 300
+    synthesis_max_tokens: 1800
+    exclude_topic_slugs:
+      - active-galactic
+      - distribution-sed
+      - energy-distribution
+      - energy-distribution-sed
+      - formation-rate
+      - formation-rates
+      - galactic-nuclei
+      - galactic-nucleus
+      - research-seeks
+      - section-section
+      - spectral-energy
+      - spectral-energy-distribution-sed
+      - stellar-masses
+      - supermassive-black
+    require_human_approval_for_synthesis: true
+
+  monthly_question_curator:
+    enabled: true
+    timezone: "Asia/Seoul"
+    run_day: 1
+    run_at: "10:30"
+    output_dir: "wiki/questions"
+    changed_paper_window: "previous_month"
+    max_paper_pages_per_run: 100
+    max_related_papers: 5
+    max_questions_per_paper: 5
+    min_shared_facets: 2
+    min_citations_per_question: 2
+    excluded_topic_slugs:
+      - active-galactic
+      - active-galactic-nuclei
+      - energy-distribution
+      - formation-rate
+      - galactic-nuclei
+      - galaxy-evolution
+      - galaxy-property
+      - observational-data
+      - physical-property
+      - research-seeks
+      - star-formation
+      - stellar-masses
+
+  research_chat:
+    model: ""
+    max_context_pages: 8
+    require_citations: true
+    qmd:
+      enabled: true
+      required: false
+      command: "qmd"
+      index: "astro-ph-llm-wiki"
+      mode: "search"
+      timeout_seconds: 8
+      update_timeout_seconds: 600
+      collections:
+        - name: "astro-papers"
+          path: "wiki/papers"
+          mask: "**/*.md"
+        - name: "astro-topics"
+          path: "wiki/topics"
+          mask: "**/*.md"
+        - name: "astro-daily"
+          path: "wiki/daily"
+          mask: "**/*.md"
+        - name: "astro-newsletters"
+          path: "wiki/newsletters"
+          mask: "**/*.md"
+        - name: "astro-questions"
+          path: "wiki/questions"
+          mask: "**/*.md"
+        - name: "astro-ko-summaries"
+          path: "data/summaries/ko"
+          mask: "**/*.md"
+        - name: "astro-deep-summaries"
+          path: "data/summaries/deep/ko"
+          mask: "**/*.md"
+        - name: "astro-markdown"
+          path: "data/markdown"
+          mask: "**/*.md"
+        - name: "astro-text"
+          path: "data/text"
+          mask: "**/*.txt"
+      general_collections:
+        - "astro-papers"
+        - "astro-topics"
+        - "astro-newsletters"
+        - "astro-questions"
+        - "astro-ko-summaries"
+        - "astro-deep-summaries"
+        - "astro-markdown"
+        - "astro-text"
+      paper_collections:
+        - "astro-papers"
+        - "astro-ko-summaries"
+        - "astro-deep-summaries"
+        - "astro-markdown"
+        - "astro-text"
+      selected_paper_collections:
+        - "astro-papers"
+        - "astro-ko-summaries"
+        - "astro-deep-summaries"
+        - "astro-markdown"
+        - "astro-text"
+
+  korean_summary_precompute:
+    enabled: true
+    timezone: "Asia/Seoul"
+    run_at: "02:30"
+    model: ""
+    statuses:
+      - graphed
+    max_papers_per_run: null
+    sleep_seconds: 2
+    refresh_existing: false
+
+  conversation_memory:
+    require_human_approval: true
+
+  wiki_lint:
+    schedule: "weekly"

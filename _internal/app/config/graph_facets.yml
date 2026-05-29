@@ -1,0 +1,12 @@
+facets:
+  method:
+    dwarf galaxies:
+      keywords:
+      - dwarf galaxies
+      source: custom
+  observation:
+    merging:
+      keywords:
+      - merging
+      source: custom
+  topic: {}

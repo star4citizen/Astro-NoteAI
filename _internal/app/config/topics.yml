@@ -1,0 +1,155 @@
+topics:
+  external_galaxy_evolution:
+    label: "External Galaxy Formation and Evolution"
+    categories:
+      - astro-ph.GA
+    anchor_keywords:
+      - galaxies
+      - galaxy formation
+      - galaxy evolution
+      - stellar mass
+      - star formation
+      - star-forming
+      - quenching
+      - morphology
+      - metallicity
+      - circumgalactic
+      - interstellar medium
+      - galaxy merger
+      - post-merger
+      - dwarf galaxy
+      - high-redshift galaxy
+      - lyman-alpha emitter
+      - little red dot
+    required_science_keywords:
+      - galaxy evolution
+      - galaxy formation
+      - stellar mass
+      - star formation
+      - star-forming
+      - quenching
+      - morphology
+      - metallicity
+      - circumgalactic
+      - interstellar medium
+      - gas fraction
+      - dust attenuation
+      - stellar population
+      - merger
+      - post-merger
+      - environment
+      - satellite galaxy
+      - high-redshift galaxy
+      - lyman-alpha emitter
+      - little red dot
+    high_value_keywords:
+      - galaxy evolution
+      - galaxy formation
+      - galaxies
+      - stellar mass
+      - star formation
+      - star-forming
+      - quenching
+      - morphology
+      - metallicity
+      - circumgalactic
+      - interstellar medium
+      - gas fraction
+      - dust attenuation
+      - stellar population
+      - merger
+      - post-merger
+      - environment
+      - satellite galaxy
+      - dwarf galaxy
+      - high-redshift galaxy
+      - lyman-alpha emitter
+      - little red dot
+    supporting_keywords:
+      - jwst
+      - alma
+      - euclid
+      - cosmos
+      - redshift
+      - survey
+      - simulation
+    negative_keywords:
+      - hubble tension
+      - cosmic curvature
+      - dark energy
+      - gravitational wave
+      - neutron star
+      - exoplanet
+      - solar
+      - inflation
+      - scalar-tensor
+      - quintessence
+      - cmb
+      - milky way
+      - stellar stream
+      - stellar streams
+      - stellar shells
+      - stellar shells and streams
+      - giant eruption
+      - supernova
+      - transient
+      - eta carinae
+      - η carinae
+      - stellar streams around the milky way
+      - molecular cloud
+      - molecular clouds
+      - alma-imf
+      - imf origin
+      - core subfragmentation
+      - fragmentation cascade
+      - omega centauri
+      - globular cluster
+      - globular clusters
+      - galactic firework
+      - wormhole
+      - black hole binaries
+      - boson star
+      - circumbinary
+      - magnetically arrested disk
+      - magnetically arrested disks
+      - fermi-lat
+      - sky background
+      - neutron-star
+      - halo bias
+      - reionization topology
+      - self-interacting dark matter
+      - intergalactic medium
+      - cosmic dynamics
+      - vorticity
+      - rotational flow
+      - sun
+      - solar
+
+  ml_in_astronomy:
+    label: "Machine Learning in Astronomy"
+    categories:
+      - astro-ph.IM
+      - astro-ph.GA
+      - astro-ph.CO
+    high_value_keywords:
+      - machine learning
+      - deep learning
+      - neural network
+      - transformer
+      - diffusion model
+      - foundation model
+      - simulation-based inference
+      - bayesian neural
+      - photometric redshift
+      - anomaly detection
+      - self-supervised
+
+selection:
+  min_relevance_score: 4
+  accept_topics:
+    - external_galaxy_evolution
+    - both
+  strong_category_bonus:
+    astro-ph.GA: 2
+    astro-ph.IM: 1
+    astro-ph.CO: 0
