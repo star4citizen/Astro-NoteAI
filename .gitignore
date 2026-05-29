@@ -1,6 +1,4 @@
-# Large packaged artifacts belong in GitHub Releases.
-Astro-Note-AI.exe
-Astro-Note-AI.dmg
+# Large packaged runtime folders belong in GitHub Releases.
 Astro-Note-AI_*.zip
 AstroPhLLMWiki
 AstroPhLLMWiki.bak-before-window-title

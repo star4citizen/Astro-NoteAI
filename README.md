@@ -26,9 +26,10 @@ _internal/app/ui/       프론트엔드 파일
 RUNTIME_REQUIREMENTS.md Linux 런타임 요구 사항
 ```
 
-패키징된 실행 파일, PyInstaller 런타임, 업로드된 PDF, 생성된 Wiki/Graph/cache/log 파일은
-Git 저장소에 포함하지 않습니다. 배포용 `.exe`, `.dmg`, `.zip` 파일은 GitHub Releases에
-업로드하는 방식을 권장합니다.
+Windows/macOS 패키지 파일은 Git LFS로 관리합니다. PyInstaller 런타임 폴더,
+업로드된 PDF, 생성된 Wiki/Graph/cache/log 파일은 Git 저장소에 포함하지 않습니다.
+Linux one-folder 패키지는 실행 파일과 `_internal` 런타임 폴더가 함께 필요하므로
+GitHub Releases에 업로드하는 방식을 권장합니다.
 
 ## 실행 전 설정
 
