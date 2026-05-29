@@ -47,7 +47,7 @@ jobs:
       - name: Create Windows self-extracting executable
         shell: pwsh
         run: |
-          Invoke-WebRequest -Uri https://www.7-zip.org/a/7z2409-extra.7z -OutFile 7z-extra.7z
+          Invoke-WebRequest -Uri https://www.7-zip.org/a/7z2600-extra.7z -OutFile 7z-extra.7z
           7z x 7z-extra.7z -o7z-extra -y
           $sfx = Get-ChildItem -Path 7z-extra -Filter 7zSD.sfx -Recurse | Select-Object -First 1
           if (-not $sfx) {
