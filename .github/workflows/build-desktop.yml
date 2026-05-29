@@ -43,7 +43,39 @@ jobs:
         shell: pwsh
         run: |
           Compress-Archive -Path dist\Astro-Note-AI -DestinationPath Astro-Note-AI-windows-x64.zip -Force
-          Copy-Item dist\Astro-Note-AI\Astro-Note-AI.exe Astro-Note-AI.exe
+
+      - name: Create Windows self-extracting executable
+        shell: pwsh
+        run: |
+          Invoke-WebRequest -Uri https://www.7-zip.org/a/7z2409-extra.7z -OutFile 7z-extra.7z
+          7z x 7z-extra.7z -o7z-extra -y
+          $sfx = Get-ChildItem -Path 7z-extra -Filter 7zSD.sfx -Recurse | Select-Object -First 1
+          if (-not $sfx) {
+            throw "7zSD.sfx was not found in the 7-Zip extra package."
+          }
+          Push-Location dist\Astro-Note-AI
+          7z a -t7z "$env:GITHUB_WORKSPACE\Astro-Note-AI-windows-x64.7z" * -mx=9
+          Pop-Location
+          @"
+          ;!@Install@!UTF-8!
+          Title="Astro-Note AI"
+          BeginPrompt="Extract and run Astro-Note AI?"
+          RunProgram="Astro-Note-AI.exe"
+          ;!@InstallEnd@!
+          "@ | Set-Content sfx-config.txt -Encoding utf8NoBOM
+          $output = [System.IO.File]::Create("Astro-Note-AI.exe")
+          try {
+            foreach ($part in @($sfx.FullName, "sfx-config.txt", "Astro-Note-AI-windows-x64.7z")) {
+              $input = [System.IO.File]::OpenRead($part)
+              try {
+                $input.CopyTo($output)
+              } finally {
+                $input.Dispose()
+              }
+            }
+          } finally {
+            $output.Dispose()
+          }
 
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
