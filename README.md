@@ -5,44 +5,8 @@ Astro-Note AI is a desktop app that turns research papers into a local LLM-power
 Astro-Note AI는 논문 PDF를 로컬 LLM Wiki로 변환해 연구 노트, 한글 요약, 주제 연결,
 그래프, Chat 기반 질의응답으로 다시 활용할 수 있게 해 주는 데스크톱 앱입니다.
 
-- [Screenshots / 스크린샷](#screenshots--스크린샷)
 - [English](#english)
 - [한국어](#한국어)
-
-## Screenshots / 스크린샷
-
-### Dashboard / 대시보드
-
-![Astro-Note AI Dashboard](Astro-Note-AI-readme-figure/Astro-Note-AI_Dashboard.png)
-
-### Upload / 업로드
-
-![Astro-Note AI Upload](Astro-Note-AI-readme-figure/Astro-Note-AI_Upload.png)
-
-### Discover Papers / 논문 검색
-
-![Astro-Note AI Discover Papers](Astro-Note-AI-readme-figure/Astro-Note-AI_Upload_Discover_Paper.png)
-
-### Papers / 논문 관리
-
-![Astro-Note AI Papers](Astro-Note-AI-readme-figure/Astro-Note-AI_Papers.png)
-
-### Wiki / 위키
-
-![Astro-Note AI Wiki](Astro-Note-AI-readme-figure/Astro-Note-AI_Wiki.png)
-
-### Chat / 채팅
-
-![Astro-Note AI Chat](Astro-Note-AI-readme-figure/Astro-Note-AI_Chat.png)
-
-### Paper Chat / 논문별 채팅
-
-![Astro-Note AI Paper Chat](Astro-Note-AI-readme-figure/Astro-Note-AI_paper_chat.png)
-
-### Graph / 그래프
-
-![Astro-Note AI Graph](Astro-Note-AI-readme-figure/Astro-Note-AI_Graph.png)
-
 
 ## English
 
@@ -82,6 +46,8 @@ The main benefits are:
 
 Dashboard is the starting point for checking the current state of the research Wiki.
 
+![Astro-Note AI Dashboard](Astro-Note-AI-readme-figure/Astro-Note-AI_Dashboard.png)
+
 - Shows metrics for total papers, graphed papers, Wiki pages, and graph edges.
 - Lists semantic topic groups extracted by the app.
 - Shows recent papers so you can jump directly to PDF, Wiki, or Chat.
@@ -91,6 +57,8 @@ Dashboard is the starting point for checking the current state of the research W
 
 Upload is the workspace for converting papers and documents into the research Wiki.
 
+![Astro-Note AI Upload](Astro-Note-AI-readme-figure/Astro-Note-AI_Upload.png)
+
 - `Upload Paper / Document` accepts multiple PDF, Markdown, and plain text files.
 - Uploaded PDFs go through text extraction, Markdown conversion, Wiki generation, and Korean summary generation.
 - `Batch Process` handles a folder of PDFs. It can process only new/changed files or reprocess everything.
@@ -98,11 +66,16 @@ Upload is the workspace for converting papers and documents into the research Wi
 - The progress panel shows the current stage, active file, logs, and success/failure status.
 - `Discover Papers` searches ADS/arXiv/local sources by research goal, method, object name, or arXiv syntax.
 - `LLM goal` converts a natural-language research goal into astronomy search terms.
+
+![Astro-Note AI Discover Papers](Astro-Note-AI-readme-figure/Astro-Note-AI_Upload_Discover_Paper.png)
+
 - Search results appear as a similarity graph and candidate list. Selected papers can be downloaded and turned into Wiki pages with `Build Wiki`.
 
 #### Papers
 
 Papers is the review and reading view for processed papers.
+
+![Astro-Note AI Papers](Astro-Note-AI-readme-figure/Astro-Note-AI_Papers.png)
 
 - Search by title, paper ID, or abstract.
 - Filter papers by processing status.
@@ -117,6 +90,8 @@ Papers is the review and reading view for processed papers.
 
 Wiki is the main reading and management area for generated research notes.
 
+![Astro-Note AI Wiki](Astro-Note-AI-readme-figure/Astro-Note-AI_Wiki.png)
+
 - Browse Markdown Wiki folders such as `wiki/papers`, `wiki/document`, `wiki/daily`, and `wiki/topics`.
 - Read rendered paper Wiki pages with key points, evidence sections, related topics, and links.
 - Open Wiki links in the main reader and preview source/paper links in the side reader.
@@ -129,16 +104,23 @@ Wiki is the main reading and management area for generated research notes.
 
 Chat lets you ask questions over the saved research Wiki and paper text.
 
+![Astro-Note AI Chat](Astro-Note-AI-readme-figure/Astro-Note-AI_Chat.png)
+
 - General Wiki Chat answers questions over the whole Wiki.
 - Paper-specific Chat uses the selected paper's PDF/Wiki as context.
 - The selected Chat model generates answers, and Wiki links/equations remain readable inside the app.
 - Paper Chat can show the PDF pane and Korean summary alongside the conversation.
+
+![Astro-Note AI Paper Chat](Astro-Note-AI-readme-figure/Astro-Note-AI_paper_chat.png)
+
 - `Save Q&A` stores useful question-answer pairs.
 - `Propose Wiki Update` turns an answer and its sources into a Wiki update proposal for later review.
 
 #### Graph
 
 Graph visualizes relationships among papers and Wiki topics.
+
+![Astro-Note AI Graph](Astro-Note-AI-readme-figure/Astro-Note-AI_Graph.png)
 
 - Displays generated `graphify-out` output in an iframe.
 - Helps inspect links among papers, topics, and documents.
