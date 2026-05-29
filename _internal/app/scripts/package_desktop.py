@@ -229,8 +229,19 @@ def main() -> None:
         raise SystemExit(result.returncode)
     app_root = dist_dir / "Astro-Note-AI" / "_internal" / "app"
     reset_packaged_app_data(app_root)
-    icon_path = ROOT / "Astro-Note-AI.ico"
-    if icon_path.exists():
+    icon_path = next(
+        (
+            path
+            for path in [
+                ROOT / "Astro-Note-AI.ico",
+                ROOT / "AstroPhLLMWiki.ico",
+                ROOT.parent.parent / "AstroPhLLMWiki.ico",
+            ]
+            if path.exists()
+        ),
+        None,
+    )
+    if icon_path is not None:
         shutil.copy2(icon_path, dist_dir / "Astro-Note-AI" / "Astro-Note-AI.ico")
     system = platform.system().lower()
     print(f"Packaged {system} build at: {dist_dir / 'Astro-Note-AI'}")

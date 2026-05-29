@@ -8,8 +8,11 @@ AstroPhLLMWiki.bak-before-window-title
 _internal/*
 !_internal/app/
 _internal/app/*
+!_internal/app/astro_wiki_desktop.py
+!_internal/app/astro_wiki_desktop.spec
 !_internal/app/config/
 !_internal/app/config/**
+!_internal/app/requirements-desktop.txt
 !_internal/app/scripts/
 !_internal/app/scripts/**
 !_internal/app/src/

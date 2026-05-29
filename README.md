@@ -154,6 +154,9 @@ Astro-Note-AI.exe   Windows executable
 Astro-Note-AI.dmg   macOS disk image
 ```
 
+New desktop packages can also be built from GitHub Actions: run **Build desktop packages**
+manually, or push a `v*` tag to upload Windows and macOS assets to a GitHub Release.
+
 The Linux one-folder package requires both the executable and the `_internal` runtime folder.
 Because the full runtime folder is large, it is not committed to Git. GitHub Releases are the
 recommended place for Linux runtime packages.
@@ -350,6 +353,9 @@ Settings는 LLM provider와 모델 연결을 관리하는 메뉴입니다.
 Astro-Note-AI.exe   Windows 실행 파일
 Astro-Note-AI.dmg   macOS 디스크 이미지
 ```
+
+새 데스크톱 패키지는 GitHub Actions의 **Build desktop packages** workflow를 직접 실행하거나,
+`v*` 태그를 push해서 GitHub Release asset으로 자동 업로드할 수 있습니다.
 
 Linux one-folder 패키지는 실행 파일과 `_internal` 런타임 폴더가 함께 필요합니다. 전체 런타임 폴더는
 매우 크기 때문에 Git 저장소에는 포함하지 않고, 배포가 필요할 때 GitHub Releases에 올리는 방식을
