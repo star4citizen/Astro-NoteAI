@@ -5,8 +5,43 @@ Astro-Note AI is a desktop app that turns research papers into a local LLM-power
 Astro-Note AI는 논문 PDF를 로컬 LLM Wiki로 변환해 연구 노트, 한글 요약, 주제 연결,
 그래프, Chat 기반 질의응답으로 다시 활용할 수 있게 해 주는 데스크톱 앱입니다.
 
+- [Screenshots / 스크린샷](#screenshots--스크린샷)
 - [English](#english)
 - [한국어](#한국어)
+
+## Screenshots / 스크린샷
+
+### Dashboard / 대시보드
+
+![Astro-Note AI Dashboard](Astro-Note-AI-readme-figure/Astro-Note-AI_Dashboard.png)
+
+### Upload / 업로드
+
+![Astro-Note AI Upload](Astro-Note-AI-readme-figure/Astro-Note-AI_Upload.png)
+
+### Discover Papers / 논문 검색
+
+![Astro-Note AI Discover Papers](Astro-Note-AI-readme-figure/Astro-Note-AI_Upload_Discover_Paper.png)
+
+### Papers / 논문 관리
+
+![Astro-Note AI Papers](Astro-Note-AI-readme-figure/Astro-Note-AI_Papers.png)
+
+### Wiki / 위키
+
+![Astro-Note AI Wiki](Astro-Note-AI-readme-figure/Astro-Note-AI_Wiki.png)
+
+### Chat / 채팅
+
+![Astro-Note AI Chat](Astro-Note-AI-readme-figure/Astro-Note-AI_Chat.png)
+
+### Paper Chat / 논문별 채팅
+
+![Astro-Note AI Paper Chat](Astro-Note-AI-readme-figure/Astro-Note-AI_paper_chat.png)
+
+### Graph / 그래프
+
+![Astro-Note AI Graph](Astro-Note-AI-readme-figure/Astro-Note-AI_Graph.png)
 
 
 ## English
