@@ -89,6 +89,7 @@ ALLOWED_WIKI_UPDATE_DIRS = {
 }
 PDF_ROOT = ROOT / "data" / "raw"
 KOREAN_SUMMARY_DIR = ROOT / "data" / "summaries" / "ko"
+ENGLISH_SUMMARY_DIR = ROOT / "data" / "summaries" / "en"
 UPLOAD_PROGRESS: dict[str, dict] = {}
 UPLOAD_PROGRESS_LOCK = threading.Lock()
 UPLOAD_PROGRESS_TTL_SECONDS = 6 * 60 * 60
@@ -252,8 +253,11 @@ def compact_markdown_for_summary(markdown: str) -> str:
     return markdown[:8000]
 
 
-def summary_cache_path(arxiv_id: str) -> Path:
+def summary_cache_path(arxiv_id: str, language: str = "ko") -> Path:
     safe_id = arxiv_id.replace("/", "_")
+    normalized = (language or "ko").lower()
+    if normalized in {"en", "english"}:
+        return ENGLISH_SUMMARY_DIR / f"{safe_id}.md"
     return KOREAN_SUMMARY_DIR / f"{safe_id}.md"
 
 
@@ -666,6 +670,7 @@ def build_paper_chat_context(question: str, arxiv_id: str) -> tuple[str, list[st
         selected,
         markdown_rel,
         str(summary_cache_path(arxiv_id).relative_to(ROOT)).replace("\\", "/"),
+        str(summary_cache_path(arxiv_id, "en").relative_to(ROOT)).replace("\\", "/"),
         str(deep_summary_cache_path(arxiv_id).relative_to(ROOT)).replace("\\", "/"),
         paper_deep_summary_wiki_rel(arxiv_id),
     }
@@ -698,6 +703,14 @@ def build_paper_chat_context(question: str, arxiv_id: str) -> tuple[str, list[st
     if cached_summary.exists():
         sources.append(str(cached_summary.relative_to(ROOT)).replace("\\", "/"))
         chunks.append(f"Cached Korean summary for selected paper:\n{cached_summary.read_text(encoding='utf-8')[:3600]}")
+
+    cached_english_summary = summary_cache_path(arxiv_id, "en")
+    if cached_english_summary.exists():
+        sources.append(str(cached_english_summary.relative_to(ROOT)).replace("\\", "/"))
+        chunks.append(
+            "Cached English summary for selected paper:\n"
+            f"{cached_english_summary.read_text(encoding='utf-8')[:3600]}"
+        )
 
     cached_deep_summary = deep_summary_cache_path(arxiv_id)
     if cached_deep_summary.exists():
@@ -1827,6 +1840,48 @@ def hangul_count(text: str) -> int:
     return len(re.findall(r"[\uac00-\ud7a3]", text or ""))
 
 
+def infer_question_answer_language(question: str) -> str:
+    lowered = (question or "").lower()
+    if re.search(r"\b(answer|respond|reply)\s+in\s+english\b", lowered) or any(
+        token in (question or "") for token in ["영어로", "영문으로", "English로"]
+    ):
+        return "English"
+    if re.search(r"\b(answer|respond|reply)\s+in\s+korean\b", lowered) or any(
+        token in (question or "") for token in ["한국어로", "한글로", "국문으로", "Korean으로"]
+    ):
+        return "Korean"
+    if re.match(
+        r"\s*(what|why|how|when|where|which|who|does|do|is|are|can|could|should|please|explain|summarize|compare|tell)\b",
+        lowered,
+    ):
+        return "English"
+    if any(token in (question or "") for token in ["뭐", "무엇", "왜", "어떻게", "인가", "입니까", "나요", "세요", "해줘", "설명"]):
+        return "Korean"
+    hangul = hangul_count(question)
+    latin = len(re.findall(r"[A-Za-z]", question or ""))
+    if hangul and hangul >= max(2, latin // 5):
+        return "Korean"
+    if latin:
+        return "English"
+    return "the same language as the question"
+
+
+def answer_language_instruction(question: str) -> str:
+    language = infer_question_answer_language(question)
+    if language in {"English", "Korean"}:
+        return (
+            f"Answer language instruction: Answer in {language}. "
+            "If the user explicitly asks for another language inside the question, follow that explicit request."
+        )
+    return "Answer language instruction: Answer in the same language as the user's question."
+
+
+def no_context_answer(question: str) -> str:
+    if infer_question_answer_language(question) == "Korean":
+        return "관련 wiki 페이지를 찾지 못했습니다."
+    return "No relevant wiki pages were found."
+
+
 def looks_like_korean_summary(markdown: str) -> bool:
     if hangul_count(markdown) < 80:
         return False
@@ -1869,6 +1924,47 @@ def korean_summary_fallback(paper: dict, wiki_markdown: str = "") -> str:
     )
 
 
+def looks_like_english_summary(markdown: str) -> bool:
+    latin = len(re.findall(r"[A-Za-z]", markdown or ""))
+    if latin < 180:
+        return False
+    if hangul_count(markdown) > max(40, latin // 5):
+        return False
+    return "english summary" in (markdown or "").lower()[:500] or markdown.lstrip().startswith("##")
+
+
+def english_summary_retry_instruction() -> str:
+    return (
+        "\n\nOutput language rules:\n"
+        "- Write in clear English Markdown.\n"
+        "- Translate the Korean summary faithfully and do not add unsupported facts.\n"
+        "- Preserve paper IDs, object names, survey names, equations, units, and technical terms when appropriate.\n"
+        "- The first line must be exactly '## English Summary'.\n"
+    )
+
+
+def english_summary_fallback(paper: dict, wiki_markdown: str = "") -> str:
+    main_results = markdown_section(wiki_markdown, "Main Results") if wiki_markdown else ""
+    source = main_results or paper.get("abstract") or "The source information is not sufficient for an English summary."
+    source = " ".join(source.split())[:1800]
+    return (
+        "## English Summary\n\n"
+        "### One-line Summary\n\n"
+        f"Automatic English translation of the Korean summary failed for `{paper['arxiv_id']}`. "
+        "The excerpt below is retained from the available source material.\n\n"
+        "### Research Question\n\n"
+        "Check the original wiki page or abstract for the exact paper-specific framing.\n\n"
+        "### Data and Method\n\n"
+        "A translated Korean summary is not available yet.\n\n"
+        "### Main Results\n\n"
+        f"{source}\n\n"
+        "### Caveats\n\n"
+        "This fallback appears when the LLM translation request fails or returns the wrong language.\n\n"
+        "### Why This Paper Matters\n\n"
+        "Review the PDF and wiki page together to judge how the paper connects to your research question.\n"
+    )
+
+
 def get_korean_paper_summary(arxiv_id: str, refresh: bool = False, model: str | None = None) -> dict:
     paper_payload = get_paper(arxiv_id)
     paper = paper_payload["paper"]
@@ -1876,7 +1972,7 @@ def get_korean_paper_summary(arxiv_id: str, refresh: bool = False, model: str | 
     if cache_path.exists() and not refresh:
         markdown = cache_path.read_text(encoding="utf-8")
         if looks_like_korean_summary(markdown):
-            return {"markdown": markdown, "html": markdown_to_html(markdown), "cached": True}
+            return {"markdown": markdown, "html": markdown_to_html(markdown), "cached": True, "language": "ko"}
 
     wiki_path = ROOT / "wiki" / "papers" / f"{arxiv_id.replace('/', '_')}.md"
     wiki_markdown = wiki_path.read_text(encoding="utf-8") if wiki_path.exists() else ""
@@ -1924,7 +2020,68 @@ def get_korean_paper_summary(arxiv_id: str, refresh: bool = False, model: str | 
         markdown = korean_summary_fallback(paper, wiki_markdown)
     cache_path.parent.mkdir(parents=True, exist_ok=True)
     cache_path.write_text(markdown.rstrip() + "\n", encoding="utf-8")
-    return {"markdown": markdown, "html": markdown_to_html(markdown), "cached": False}
+    return {"markdown": markdown, "html": markdown_to_html(markdown), "cached": False, "language": "ko"}
+
+
+def get_english_paper_summary(arxiv_id: str, refresh: bool = False, model: str | None = None) -> dict:
+    paper_payload = get_paper(arxiv_id)
+    paper = paper_payload["paper"]
+    cache_path = summary_cache_path(arxiv_id, "en")
+    if cache_path.exists() and not refresh:
+        markdown = cache_path.read_text(encoding="utf-8")
+        if looks_like_english_summary(markdown):
+            return {"markdown": markdown, "html": markdown_to_html(markdown), "cached": True, "language": "en"}
+
+    wiki_path = ROOT / "wiki" / "papers" / f"{arxiv_id.replace('/', '_')}.md"
+    wiki_markdown = wiki_path.read_text(encoding="utf-8") if wiki_path.exists() else ""
+    korean_summary = get_korean_paper_summary(arxiv_id, refresh=False, model=model)["markdown"]
+    context = compact_markdown_for_summary(wiki_markdown)
+    text_context = extracted_text_context(paper, "summary results methods limitations", max_chars=12000)
+    system_prompt = (
+        "You are an astronomy research assistant translating a Korean paper summary into English. "
+        "Use the Korean summary as the primary source, and use the paper metadata and excerpts only to preserve technical accuracy."
+    )
+    user_content = (
+        f"Paper ID: {paper['arxiv_id']}\n"
+        f"Title: {paper['title']}\n"
+        f"Categories: {paper.get('categories') or ''}\n\n"
+        f"Abstract:\n{paper.get('abstract') or ''}\n\n"
+        f"Korean summary to translate:\n{korean_summary[:12000]}\n\n"
+        f"Wiki excerpt for terminology checks:\n{context[:8000]}\n\n"
+        f"Extracted paper text excerpt for terminology checks:\n{text_context[:8000]}"
+    )
+    try:
+        markdown = chat(
+            [
+                {"role": "system", "content": system_prompt + english_summary_retry_instruction()},
+                {"role": "user", "content": user_content + english_summary_retry_instruction()},
+            ],
+            model=model or chat_model(),
+            timeout=180.0,
+        ).strip()
+        if not looks_like_english_summary(markdown):
+            markdown = chat(
+                [
+                    {
+                        "role": "system",
+                        "content": (
+                            system_prompt
+                            + english_summary_retry_instruction()
+                            + "\nThe previous response did not satisfy the English Markdown requirement. Return only English Markdown."
+                        ),
+                    },
+                    {"role": "user", "content": user_content + english_summary_retry_instruction()},
+                ],
+                model=model or chat_model(),
+                timeout=240.0,
+            ).strip()
+    except Exception:
+        markdown = english_summary_fallback(paper, wiki_markdown)
+    if not looks_like_english_summary(markdown):
+        markdown = english_summary_fallback(paper, wiki_markdown)
+    cache_path.parent.mkdir(parents=True, exist_ok=True)
+    cache_path.write_text(markdown.rstrip() + "\n", encoding="utf-8")
+    return {"markdown": markdown, "html": markdown_to_html(markdown), "cached": False, "language": "en"}
 
 
 def paperforge_config() -> dict:
@@ -4221,6 +4378,7 @@ def reject_paper(arxiv_id: str) -> dict:
         wiki_path = ROOT / paper_wiki_rel(arxiv_id)
         legacy_wiki_path = ROOT / f"wiki/papers/{paper_safe_id(arxiv_id)}.md"
         summary_path = summary_cache_path(arxiv_id)
+        english_summary_path = summary_cache_path(arxiv_id, "en")
         deep_summary_path = deep_summary_cache_path(arxiv_id)
         deep_summary_wiki_path = ROOT / paper_deep_summary_wiki_rel(arxiv_id)
         deep_summary_wiki_export = deep_summary_wiki_export_path(arxiv_id)
@@ -4232,6 +4390,7 @@ def reject_paper(arxiv_id: str) -> dict:
             wiki_path,
             legacy_wiki_path if legacy_wiki_path != wiki_path else None,
             summary_path,
+            english_summary_path,
             deep_summary_path,
             deep_summary_wiki_path,
             deep_summary_wiki_export,
@@ -4293,6 +4452,7 @@ def delete_paper(arxiv_id: str) -> dict:
             ROOT / legacy_paper_rel if legacy_paper_rel != paper_rel else None,
             ROOT / "data" / "markdown" / f"{safe_id}.md",
             summary_cache_path(arxiv_id),
+            summary_cache_path(arxiv_id, "en"),
             deep_summary_cache_path(arxiv_id),
             ROOT / paper_deep_summary_wiki_rel(arxiv_id),
             deep_summary_wiki_export_path(arxiv_id),
@@ -4461,7 +4621,8 @@ def ask_wiki(payload: dict) -> dict:
         context = build_context(pages)
         sources = [page.path for page in pages]
     if not context:
-        return {"answer": "No relevant wiki pages were found.", "sources": []}
+        answer = no_context_answer(question)
+        return {"answer": answer, "answer_html": markdown_to_html(answer), "sources": []}
     backend = selected_chat_backend(payload)
     model = backend["model"]
     prompt = (ROOT / "config" / "prompts" / "answer_question.md").read_text(encoding="utf-8")
@@ -4489,9 +4650,10 @@ def ask_wiki(payload: dict) -> dict:
             "Clearly separate retrieved evidence from uncited general background.\n\n"
         )
     try:
+        language_instruction = answer_language_instruction(question)
         messages = [
             {"role": "system", "content": prompt},
-            {"role": "user", "content": f"{scope}Question: {question}\n\nContext:\n{context}"},
+            {"role": "user", "content": f"{scope}{language_instruction}\n\nQuestion: {question}\n\nContext:\n{context}"},
         ]
         if backend["provider"] == "codex":
             answer = codex_chat(messages, model=model, timeout=600.0)
@@ -4523,7 +4685,7 @@ def graph_node_for_source(source: str) -> str:
     text_match = re.match(r"^data/text/(?P<arxiv_id>.+)\.txt$", source)
     if text_match:
         return paper_wiki_rel(text_match.group("arxiv_id"))
-    summary_match = re.match(r"^data/summaries/ko/(?P<arxiv_id>.+)\.md$", source)
+    summary_match = re.match(r"^data/summaries/(?:ko|en)/(?P<arxiv_id>.+)\.md$", source)
     if summary_match:
         return paper_wiki_rel(summary_match.group("arxiv_id"))
     deep_summary_match = re.match(r"^data/summaries/deep/ko/(?P<arxiv_id>.+)\.md$", source)
@@ -4939,9 +5101,11 @@ class UiHandler(BaseHTTPRequestHandler):
             elif path == "/api/paper":
                 json_response(self, get_paper(params.get("id", [""])[0]))
             elif path == "/api/paper-summary":
+                summary_language = params.get("language", ["ko"])[0].lower()
+                summary_func = get_english_paper_summary if summary_language in {"en", "english"} else get_korean_paper_summary
                 json_response(
                     self,
-                    get_korean_paper_summary(
+                    summary_func(
                         params.get("id", [""])[0],
                         refresh=params.get("refresh", ["0"])[0] in {"1", "true", "yes"},
                     ),

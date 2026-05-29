@@ -1121,18 +1121,23 @@ async function paperAction(arxivId, action) {
   }
 }
 
-async function loadKoreanSummary(arxivId, refresh = false, targetSelector = "#koreanSummary") {
+async function loadPaperSummary(arxivId, language = "ko", refresh = false, targetSelector = "#koreanSummary") {
   const target = $(targetSelector);
   if (!target) return;
-  const loadedKey = `ko:${arxivId}`;
+  const normalizedLanguage = language === "en" ? "en" : "ko";
+  const loadedKey = `${normalizedLanguage}:${arxivId}`;
   if (!refresh && target.dataset.loaded === loadedKey) return;
   target.dataset.loaded = "";
   target.hidden = false;
   const requestToken = `${loadedKey}:${Date.now()}`;
   target.dataset.requestToken = requestToken;
-  target.textContent = refresh ? "한글 요약을 다시 생성하는 중입니다..." : "한글 요약을 불러오는 중입니다...";
+  const loadingText = {
+    ko: refresh ? "한글 요약을 다시 생성하는 중입니다..." : "한글 요약을 불러오는 중입니다...",
+    en: refresh ? "Regenerating the English summary..." : "Translating the summary into English...",
+  };
+  target.textContent = loadingText[normalizedLanguage];
   try {
-    const query = new URLSearchParams({ id: arxivId });
+    const query = new URLSearchParams({ id: arxivId, language: normalizedLanguage });
     if (refresh) query.set("refresh", "1");
     const data = await api(`/api/paper-summary?${query.toString()}`, { timeoutMs: 240000 });
     if (target.dataset.requestToken !== requestToken) return;
@@ -1144,6 +1149,14 @@ async function loadKoreanSummary(arxivId, refresh = false, targetSelector = "#ko
     if (target.dataset.requestToken !== requestToken) return;
     target.textContent = error.message;
   }
+}
+
+async function loadKoreanSummary(arxivId, refresh = false, targetSelector = "#koreanSummary") {
+  return loadPaperSummary(arxivId, "ko", refresh, targetSelector);
+}
+
+async function loadEnglishSummary(arxivId, refresh = false, targetSelector = "#chatKoreanSummary") {
+  return loadPaperSummary(arxivId, "en", refresh, targetSelector);
 }
 
 async function loadWikiList() {
@@ -2028,10 +2041,12 @@ function renderChatContext() {
     </div>
     <div class="chat-context-actions">
       <button type="button" id="loadChatKoreanSummary">한글 요약</button>
+      <button type="button" id="loadChatEnglishSummary">English Summary</button>
       <button type="button" id="clearChatPaper">Clear</button>
     </div>
   `;
   $("#loadChatKoreanSummary").addEventListener("click", () => loadKoreanSummary(paper.arxiv_id, false, "#chatKoreanSummary"));
+  $("#loadChatEnglishSummary").addEventListener("click", () => loadEnglishSummary(paper.arxiv_id, false, "#chatKoreanSummary"));
   $("#clearChatPaper").addEventListener("click", clearPaperChat);
 }
 
