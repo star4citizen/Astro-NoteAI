@@ -147,19 +147,32 @@ These internal management screens are included even though they are not part of 
 
 ### Download And Run
 
-This repository includes Windows/macOS packaged files through Git LFS.
+This repository includes Windows/macOS/Linux packaged files through Git LFS.
 
 ```text
-Astro-Note-AI.exe   Windows executable
-Astro-Note-AI.dmg   macOS disk image
+Astro-Note-AI.exe                 Windows executable
+Astro-Note-AI-macos-arm64.dmg     macOS Apple Silicon disk image
+Astro-Note-AI-macos.dmg           macOS disk image
+Astro-Note-AI-linux-amd64.deb     Ubuntu/Debian package
+```
+
+Install the Linux package on Ubuntu/Debian:
+
+```bash
+sudo apt install ./Astro-Note-AI-linux-amd64.deb
+```
+
+After installation, launch it from the application menu or run:
+
+```bash
+astro-note-ai
 ```
 
 New desktop packages can also be built from GitHub Actions: run **Build desktop packages**
 manually, or push a `v*` tag to upload Windows and macOS assets to a GitHub Release.
 
 The Linux one-folder package requires both the executable and the `_internal` runtime folder.
-Because the full runtime folder is large, it is not committed to Git. GitHub Releases are the
-recommended place for Linux runtime packages.
+The `.deb` package wraps that runtime into a single installable package.
 
 ### Before First Use
 
@@ -347,19 +360,32 @@ Settings는 LLM provider와 모델 연결을 관리하는 메뉴입니다.
 
 ### 다운로드 및 실행
 
-이 저장소에는 Windows/macOS 패키지 파일이 Git LFS로 포함되어 있습니다.
+이 저장소에는 Windows/macOS/Linux 패키지 파일이 Git LFS로 포함되어 있습니다.
 
 ```text
-Astro-Note-AI.exe   Windows 실행 파일
-Astro-Note-AI.dmg   macOS 디스크 이미지
+Astro-Note-AI.exe                 Windows 실행 파일
+Astro-Note-AI-macos-arm64.dmg     macOS Apple Silicon 디스크 이미지
+Astro-Note-AI-macos.dmg           macOS 디스크 이미지
+Astro-Note-AI-linux-amd64.deb     Ubuntu/Debian 설치 패키지
+```
+
+Ubuntu/Debian에서 Linux 패키지를 설치합니다:
+
+```bash
+sudo apt install ./Astro-Note-AI-linux-amd64.deb
+```
+
+설치 후 앱 메뉴에서 실행하거나 터미널에서 다음 명령으로 실행할 수 있습니다:
+
+```bash
+astro-note-ai
 ```
 
 새 데스크톱 패키지는 GitHub Actions의 **Build desktop packages** workflow를 직접 실행하거나,
 `v*` 태그를 push해서 GitHub Release asset으로 자동 업로드할 수 있습니다.
 
 Linux one-folder 패키지는 실행 파일과 `_internal` 런타임 폴더가 함께 필요합니다. 전체 런타임 폴더는
-매우 크기 때문에 Git 저장소에는 포함하지 않고, 배포가 필요할 때 GitHub Releases에 올리는 방식을
-권장합니다.
+`.deb` 패키지 안에 포함되어 단일 설치 패키지로 배포됩니다.
 
 ### 실행 전 설정
 
